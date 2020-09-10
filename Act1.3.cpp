@@ -4,10 +4,33 @@
 #include<vector>
 #include<string>
 using namespace std;
+#include"structureDato.h"
+
+void leeArchivo(vector <Dato> &vect ){
+    string hora, mins, seg; //variables auxiliares
+    ifstream archEnt; //declarar archivo de entrada
+    archEnt.open("simple.txt");//abrir archivo de entrada
+    
+    while(!archEnt.eof()){ //mientras esté abierto el archivo
+        Dato dato1;
+        archEnt >> dato1.mes >> dato1.dia;//leer tanto el mes como el día
+        getline(archEnt, hora, ':'); //separar y almacenar en variable aux, ignorando :
+        getline(archEnt, mins, ':');//separar y almacenar en variable aux, ignorando :
+        getline(archEnt, seg,':');//separar y almacenar en variable aux, ignorando :
+        archEnt >> dato1.IP;//leer el IP
+        getline (archEnt, dato1.falla); //leer la falla con espacios
+
+        dato1.hh = stoi(hora);//convertir parámetros a int
+        dato1.mm = stoi(mins);//convertir parámetros a int
+        dato1.ss = stoi(seg);//convertir parámetros a int
+        vect.push_back(dato1);
+    }
+    archEnt.close(); //Cerrar el archivo
+}
 
 void imprimir (vector <Dato> vect){
     for (int i =0; i<vect.size(); i++){
-        cout << vect[i] << endl;
+        cout << vect[i].mes << endl; 
     }
 }
 
@@ -17,20 +40,19 @@ void writeFile(){//funcion para escribir en nuevo archivo
     archSal.close();//cerrar el archivo
 }
 
-void cambia(int a, int b, vector <int> &vect){ //pos a, pos b, y vector
-    int aux;
+void cambia(int a, int b, vector <Dato> &vect){ //pos a, pos b, y vector
+    Dato aux;
     aux = vect[a];
     vect[a] = vect[b];
     vect[b] = aux;  
 }
 
-void dividir(vector<int> &vect, int inicio, int fin, int &pivot, int &comp){
-    int pivVal = vect[inicio]; //el elemento pivote es el primer elemento
+void dividir(vector<Dato> &vect, int inicio, int fin, int &pivot){
+    int pivVal = vect[inicio].key; //el elemento pivote es el primer elemento
     int j = inicio; // posición de inicio
 
     for(int i=inicio+1; i<=fin; i++ ){ //recorrer el subvector de inicio a fin
-        comp++;
-        if(vect[i] < pivVal){ //si el elemento es menor al pivote
+        if(vect[i].key < pivVal){ //si el elemento es menor al pivote
             j++;
             cambia(i,j,vect);//entonces ponerlo Antes del pivote
         }//de lo contrario dejarlo donde esta ()
@@ -39,18 +61,12 @@ void dividir(vector<int> &vect, int inicio, int fin, int &pivot, int &comp){
     cambia(inicio, pivot,vect); //inicializar el pivote con el elemento del inicio
 }
 
-void quickSort(vector<int> &vect, int inicio, int fin, int &comp){
+void quickSort(vector<Dato> &vect, int inicio, int fin){
     int pivot;
     if(inicio<fin){ // si hay más de un elemento por comparar
-        dividir(vect, inicio, fin, pivot, comp);
-        quickSort(vect, inicio, pivot-1, comp);
-        quickSort(vect, pivot+1, fin, comp);
-    }
-}
-
-void copiaArrVect(struct Dato arr[], vector<Dato> vect, int cant){
-    for(int i=0; i<=cant;i++ ){
-        vect.push_back(arr[i]);
+        dividir(vect, inicio, fin, pivot);
+        quickSort(vect, inicio, pivot-1);
+        quickSort(vect, pivot+1, fin);
     }
 }
 
@@ -70,45 +86,26 @@ int traduceMes(string mes){//expresar el mes en numero
     return result;//retorna el numero del mes
 }
 
-int traduceHora(int hour, int min, int sec){//escribe la hora como en cantidad de segundos
-    int result = 0;
-    result = hour/3600;
-    result+= min/60;
-    result+= sec;
-    return result;//retornar la cantidad de minutos
+void askUser(int mot, int day, int hour, int min, int sec){
+    string month;
+    cout<<"Digite la Fecha en formato MMM y DD"<<endl;
+    cin >> month >> day;
+    mot = traduceMes(month);
+    cout << "Digitar la hora exacta en formato HH MM SS" <<endl;
+    cin >>hour >> min >> sec;
 }
 
 int main(){
-    int n = 1; //cantidad de datos en el arr
-    struct Dato {
-        string mes, IP, falla; //caracteristicas string del dato
-        int dia, hh, mm, ss, time, month; //características del dato
-    };
-    vector <Dato> data;//vector de tipo dato
-    string hora, mins, seg; //variables auxiliares
-    struct Dato lineas[16900]; // arreglo de tipo dato
-    ifstream archEnt; //declarar archivo de entrada
-    archEnt.open("simple.txt");//abrir archivo de entrada
-
-    while(!archEnt.eof()){ //mientras esté abierto el archivo
-        archEnt >> lineas[n].mes >> lineas[n].dia;//leer tanto el mes como el día
-        getline(archEnt, hora, ':'); //separar y almacenar en variable aux, ignorando :
-        getline(archEnt, mins, ':');//separar y almacenar en variable aux, ignorando :
-        getline(archEnt, seg,':');//separar y almacenar en variable aux, ignorando :
-        archEnt >> lineas[n].IP;//leer el IP
-        getline (archEnt, lineas[n].falla); //leer la falla con espacios
-
-        lineas[n].hh = stoi(hora);//convertir parámetros a int
-        lineas[n].mm = stoi(mins);//convertir parámetros a int
-        lineas[n].ss = stoi(seg);//convertir parámetros a int
-        n++; //actualizar cantidad de datos
+    vector <Dato> data;//declarar vector de tipo dato
+    int mes, dia, hora, minu, seg;
+    leeArchivo(data);//invocar a la función que lee el archivo
+    for (int i = 0; i < data.size(); i++){//recorrer todo el arreglo
+        data[i].month = traduceMes(data[i].mes); //convertir el mes a un numero
+        data[i].key = (data[i].month * 100000000) + (data[i].dia * 1000000) + 
+        (data[i].hh * 10000) + (data[i].mm * 100) + data[i].ss; //crear una clave númerica que indique la magnitud de cada dato.
     }
-    archEnt.close(); //Cerrar el archivo
-    cout << n << endl; // imprimir cantidad de datos
-
-    for (int j = 0; j < n; j++){//recorrer todo el arreglo
-        lineas[j].month = traduceMes(lineas[j].mes); //convertir el mes a un numero
-        lineas[j].time = traduceHora(lineas[j].hh, lineas[j].mm, lineas[j].ss ); //convertir la hora exacta a cantidad de segundos
-    }
+    quickSort(data, 0, data.size());//odernar el vector utilizando el método de quicksort por clave num[erica]
+    askUser(mes, dia, hora, minu, seg);//invocar a la funcion para preguntar datos al usuario
+    
     return 0;
 }
