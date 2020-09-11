@@ -1,3 +1,4 @@
+//A00828347
 #include <iostream>
 #include<fstream>
 #include <sstream> 
@@ -9,7 +10,7 @@ using namespace std;
 void leeArchivo(vector <Dato> &vect ){
     string hora, mins, seg; //variables auxiliares
     ifstream archEnt; //declarar archivo de entrada
-    archEnt.open("simple.txt");//abrir archivo de entrada
+    archEnt.open("bitacora.txt");//abrir archivo de entrada
     
     while(!archEnt.eof()){ //mientras esté abierto el archivo
         Dato dato1;
@@ -23,20 +24,25 @@ void leeArchivo(vector <Dato> &vect ){
         dato1.hh = stoi(hora);//convertir parámetros a int
         dato1.mm = stoi(mins);//convertir parámetros a int
         dato1.ss = stoi(seg);//convertir parámetros a int
-        vect.push_back(dato1);
+        vect.push_back(dato1);//agregar el dato al vector
     }
     archEnt.close(); //Cerrar el archivo
 }
 
 void imprimir (vector <Dato> vect){
     for (int i =0; i<vect.size(); i++){
-        cout << vect[i].mes << endl; 
+        cout << vect[i].mes << " " << vect[i].dia << " " << vect[i].hh 
+        << ":" << vect[i].mm << ":" << vect[i].ss << " " << vect[i].IP << " " << vect[i].falla<<endl; 
     }
 }
 
-void writeFile(){//funcion para escribir en nuevo archivo
+void writeFile(vector <Dato> vect){//funcion para escribir en nuevo archivo
     ofstream archSal("nuevabitacora.txt");//crear nuevo archivo
-    archSal << "helloWorld" <<endl;//escribir en el archivo
+    
+    for (int i =0; i<vect.size(); i++){
+    archSal << vect[i].mes << " " << vect[i].dia << " " << vect[i].hh 
+        << ":" << vect[i].mm << ":" << vect[i].ss << " " << vect[i].IP << " " << vect[i].falla<<endl; 
+    }
     archSal.close();//cerrar el archivo
 }
 
@@ -68,6 +74,7 @@ void quickSort(vector<Dato> &vect, int inicio, int fin){
         quickSort(vect, inicio, pivot-1);
         quickSort(vect, pivot+1, fin);
     }
+    // Complejidad: O(nlog(n))
 }
 
 int traduceMes(string mes){//expresar el mes en numero
@@ -86,18 +93,57 @@ int traduceMes(string mes){//expresar el mes en numero
     return result;//retorna el numero del mes
 }
 
-void askUser(int mot, int day, int hour, int min, int sec){
-    string month;
-    cout<<"Digite la Fecha en formato MMM y DD"<<endl;
-    cin >> month >> day;
+void askUser(int &key1, int &key2){
+    int mot, day, hour, min, sec; //datos para inferior
+    int mot2, day2, hour2, min2, sec2; //datos para superior
+    string month, month2; //variables auxiliares para conversion
+    cout <<"DATOS LIMITE INFERIOR:"
+    <<" \n Digite la Fecha en formato MMM DD HH MM SS"<<endl;
+    cin >> month >> day >> hour >> min >> sec;
     mot = traduceMes(month);
-    cout << "Digitar la hora exacta en formato HH MM SS" <<endl;
-    cin >>hour >> min >> sec;
+
+    cout <<"DATOS LIMITE SUPERIOR:"
+    <<" \n Digite la Fecha en formato MMM DD HH MM SS"<<endl;
+    cin >> month2 >> day2 >> hour2 >> min2 >> sec2;
+    mot2 = traduceMes(month2);
+
+    key1 = (mot * 100000000) + (day * 1000000) + (hour * 10000) + (min * 100) + sec;
+    key2 = (mot2 * 100000000) + (day2 * 1000000) + (hour2 * 10000) + (min2 * 100) + sec2;
+}
+
+int busqBin(vector<Dato> vect, int key){
+    int cant = vect.size();
+
+    int low, high, mid;
+    int result = -2;
+    low = 0; // El primer elemento del vector 
+    high = cant-1; // El ultimo elemento del vector
+
+    while( (low <= high)){ //mientras no se haya encontrado el elemento o se llegue al final de las particiones de búsqueda
+        mid = (high + low)/2; //la posicion de la mitad sera el promedio entre el menor y el mayor
+        
+        if ( (key <= vect[mid].key) && (key>vect[mid-1].key) ){ //si la clave en la mitad es menor o igual a la buscada y la anterior es menor
+            result = mid; // retornar la posición de la mitad como rango superior
+            break; //se ha encontrado elemento, entonces se puede salir
+        }else if ( (key > vect[mid].key) && (key>vect[mid-1].key)){// si tanto el elemento de la mitad es menor como el anterior, entonces establecer mitad como nuevo low
+                low = mid +1; // el elemento siguiente de la mitad será el nuevo menor
+        }else{ //si tanto el elemento de la mitad es mayor como el anterior, entonces establecer mitad como nuevo low
+                high = mid -1;//entonces el anterior al de la mitad será el nuevo mayor 
+        }
+    }
+    return result;
+    //Complejidad: O(log(n))
+}
+
+void crearRango(vector<Dato> datos, vector<Dato> &result, int inf, int sup){
+    for(int i = inf; i<sup; i++){
+        result.push_back(datos[i]); 
+    }
 }
 
 int main(){
-    vector <Dato> data;//declarar vector de tipo dato
-    int mes, dia, hora, minu, seg;
+    vector <Dato> data, result;//declarar vector de tipo dato
+    int key1, key2, limI, limS;
     leeArchivo(data);//invocar a la función que lee el archivo
     for (int i = 0; i < data.size(); i++){//recorrer todo el arreglo
         data[i].month = traduceMes(data[i].mes); //convertir el mes a un numero
@@ -105,7 +151,17 @@ int main(){
         (data[i].hh * 10000) + (data[i].mm * 100) + data[i].ss; //crear una clave númerica que indique la magnitud de cada dato.
     }
     quickSort(data, 0, data.size());//odernar el vector utilizando el método de quicksort por clave num[erica]
-    askUser(mes, dia, hora, minu, seg);//invocar a la funcion para preguntar datos al usuario
-    
+    cout <<"***DATOS ORDENADOS: ***"<<endl;
+    imprimir(data);//imprimir los datos ordenados
+    askUser(key1, key2);//preguntar datos al usuario
+    cout <<key1<<endl;
+    cout <<key2<<endl;
+    limI = busqBin(data, key1);//buscar la posición de primer elemento mayor a esa fecha
+    limS = busqBin(data, key2);//buscar la posición del primer elemento menor a esta fecha.
+    //cout << "Inferior: " << limI << endl;
+    //cout << "Superior: " << limS << endl;
+    crearRango(data, result, limI, limS);
+    imprimir(result);//imprimir los datos ordenados
+    writeFile(result);//Escribir el resultado en un archivo nuevo
     return 0;
 }
