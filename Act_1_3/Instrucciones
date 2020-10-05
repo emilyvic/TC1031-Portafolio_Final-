@@ -1,0 +1,14 @@
+  
+Actividad Integral de Conceptos Básicos y Algoritmos Fundamentales 
+Hacer una aplicación que:
+
+1. Abre el archivo de entrada llamado "bitacora.txtVista previa del documento", lee todos los registros y almacena los datos 1.en un vector (Formato del archivo bitacora.pdfVista previa del documento).
+2. Crea una estructura de datos (struct) para almacenar todos los campos del archivo.
+3. Ordene la información por fecha para la realización de las búsquedas.
+4. Apóyate con métodos, atributos y/o sobre carga de operadores en tu estructura para manejar el ordenamiento de los registros del archivo.
+5. Utiliza uno de los algoritmos de ordenamiento que hiciste en la actividad 1.2
+6. Solicite al usuario las fecha y hora de inicio y fin de búsqueda de información.
+7. Utiliza uno el algoritmos de búsqueda binario para encontrar el rango inicial y el rango final.
+8. Despliegue los registros correspondientes a esas fechas.
+9. Almacenar en un archivo el resultado del ordenamiento.
+10. Realizar una investigación y reflexión en forma individual de la importancia y eficiencia del uso de los diferentes algoritmos de ordenamiento y búsqueda en una situación problema de esta naturaleza, generando un documento llamado "ReflexAct1.3.pdf"
