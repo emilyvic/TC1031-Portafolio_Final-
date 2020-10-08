@@ -1,0 +1,98 @@
+//A00828347
+#include <iostream>
+#include <sstream> 
+#include<fstream>
+#include<string>
+
+using namespace std;
+#include"Dato.h"
+#include"DoubleLinkedList.h"
+
+void leeArchivo(DoubleLinkedList <Dato> &dll){
+    string hora, mins, seg, month, IP, fault; //variables auxiliares
+    int day; 
+    ifstream archEnt; //declarar archivo de entrada
+    archEnt.open("bitacora.txt");//abrir archivo de entrada
+    
+    while(!archEnt.eof()){ //mientras esté abierto el archivo
+        archEnt >> month >> day;//leer tanto el mes como el día
+        getline(archEnt, hora, ':'); //separar y almacenar en variable aux, ignorando :
+        getline(archEnt, mins, ':');//separar y almacenar en variable aux, ignorando :
+        getline(archEnt, seg,':');//separar y almacenar en variable aux, ignorando :
+        archEnt >> IP;//leer el IP
+        getline (archEnt, fault); //leer la falla con espacios
+        Dato dato1(day, stoi(hora), stoi(mins), stoi(seg), month, IP, fault);
+        dll.addLast(dato1);//agregar el dato a la Double LinkedList
+    }
+    archEnt.close(); //Cerrar el archivo
+}
+
+
+void writeFile(DoubleLinkedList <Dato> result){//funcion para escribir en nuevo archivo
+    ofstream archSal("nuevabitacora.txt");//crear nuevo archivo
+    
+    for (int i =1; i<=result.getSize(); i++){ //recorrer toda la lista
+    archSal << result[i]; //escribe cada elemento
+    }
+    archSal.close();//cerrar el archivo
+    cout<<"Datos cargados con exito"<<endl;
+}
+
+void askUser(Dato &key1, Dato &key2){
+    int day, hour, min, sec; //datos para inferior
+    int day2, hour2, min2, sec2; //datos para superior
+    string month, month2; //variables auxiliares para conversion
+
+    cout <<"DATOS LIMITE INFERIOR:"
+    <<" \n Digite la Fecha en formato MMM DD HH MM SS"<<endl;
+    cin >> month >> day >> hour >> min >> sec;//recopilar datos del usuario
+    Dato inf(day, hour, min, sec, month);//inicializar nuevo dato clave
+    key1 = inf; 
+
+    cout <<"DATOS LIMITE SUPERIOR:"
+    <<" \n Digite la Fecha en formato MMM DD HH MM SS"<<endl;
+    cin >> month2 >> day2 >> hour2 >> min2 >> sec2;//recopilar datos del usuario
+    Dato sup(day2, hour2, min2, sec2, month2);//inicializar nuevo dato clave
+    key2 = sup;
+}
+
+void crearRango(DoubleLinkedList<Dato> datos, DoubleLinkedList<Dato> &result, int inf, int sup){
+    for(int i = inf; i<sup; i++){
+        result.addLast(datos[i]); 
+    }
+}//Complejidad O(n)
+
+int main(){
+    DoubleLinkedList <Dato> data, result;//declarar DoubleLinkedList de tipo dato
+    int limI, limS;
+    Dato key1, key2;
+
+    leeArchivo(data);//invocar a la función que lee el archivo
+    /*
+    cout <<"\n*** CARGANDO LOS SIGUIENTES DATOS ***"<<endl;
+    data.print();//imprimir los datos del archivo en pantalla
+    */
+   
+    cout <<"\n *** ORDENANDO LOS DATOS: ***" <<
+    "\n __________________________________________________________"<<endl;
+    data.sort();//ORDENAR LOS DATOS DEL ARCHIVO
+    data.print();//despliega para confirmar
+
+    askUser(key1, key2);//preguntar datos al usuario
+    
+    //buscar con busqueda binaria los indices de cada limite
+    limI = data.binarySearch(key1);
+    limS = data.binarySearch(key2);
+    /*
+    cout <<"POSICION INICIAL: " << limI <<endl;
+    cout <<"POSICION FINAL: " << limS <<endl;
+    */
+    //crear la nueva DoubleLinkedList como una sublista en el rango especificado
+    crearRango(data, result, limI, limS);
+
+    cout <<"\n ***DATOS DEL RANGO SOLICITADO: ***"<<endl;
+    result.print();//imprimir los datos del rango solicitado
+    writeFile(result);//Escribir la nueva lista en un archivo nuevo
+
+    return 0;
+}
