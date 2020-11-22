@@ -1,0 +1,80 @@
+#include <iostream>
+#include <sstream> 
+#include<fstream>
+#include<string>
+using namespace std;
+#include "Dato.h"
+#include <algorithm>
+#include<stack>
+#include<vector>
+#include<queue>
+#include "PriorityQueue.h"
+#include "Graph.h"
+
+void leerArchivo(Graph<Dato> &graph_IPS){
+    int n,m;// cantidad de vertices, cantidad de relaciones
+    string IP, mes, dia, hora, IP_source, IP_target, falla;
+    stack<Dato> stk_vertex;
+    ifstream archEnt; //declarar archivo de entrada
+    archEnt.open("bitacoraACT4_3.txt");//abrir archivo de entrada
+    archEnt >> n >> m; //leer la cantidad de vertices y cantidad de incidencias.
+
+    //Leer las IP's
+    for(int i=0; i<n; i++){//leer la cantidad de vertices distintos
+        archEnt >> IP; //leer cada IP
+        Dato ips(IP);//crear una instancia de la clase Dato
+        stk_vertex.push(ips);//agregar el dato a la stack de IP's vertices
+    }
+    cout <<endl;
+
+    Graph<Dato> g_aux(stk_vertex);//crear grafo auxiliar
+
+    //Leer las incidencias
+    for(int j=0; j<m; j++){
+        archEnt >> mes >> dia >> hora>> IP_source >> IP_target; 
+        getline(archEnt, falla);//leer la falla con espacios
+
+        Dato origen(IP_source);//inicializar dato de origen
+        Dato objetivo(IP_target);//inicializar dato de destino
+
+        g_aux.addAdj(origen, objetivo);//agregar adyacencia con origen y destino
+    }
+    cout <<endl;
+
+    graph_IPS = g_aux;
+    graph_IPS.print();//desplegar lista de adyacencia de grafo
+}//Complejidad O(n)
+
+template<class T>
+void heapSort(DoubleLinkedList<T> &dllist){
+    PriorityQueue<T> heapAux(dllist); //inicializar heap auxiliar con los datos de la lista y arreglarlos en orden de prioridad
+    dllist.clear();//limpiar la lista de todos los datos
+    while(!heapAux.isEmpty()){//mientras todavia no se vacie la lista
+        dllist.addLast(heapAux.remove());//recoger los elementos de la heap y agregarlos al final de la lista
+    }
+    cout << "\n * * * DOUBLE LINKED LIST PRIORIZADA* * * " <<endl;
+    dllist.print();
+}//Complejidad: O(n)
+
+
+int main(){
+    Graph<Dato> graph_IP;//grafo de tipo Dato inicializado por default
+    DoubleLinkedList<Edge<Dato>> dll; //Double Linked List de tipo Edge de tipo dato inicializada por default
+
+    leerArchivo(graph_IP);//leer los datos del archivo
+    graph_IP.countAdj();//contar la cantidad de adyacencias de cada vertex
+
+    dll = graph_IP.vertices; //transformar el vector a una double linked list
+    
+    /*cout << "\n * * * DOUBLE LINKED LIST * * * " <<endl;
+    dll.print();
+    */
+    heapSort(dll);//ordernarlos por cantidad de incidencias
+
+    //desplegar IP con mayor cantidad de incidencias
+    cout << "\n * * * IP con mas Incidencias: * * * " <<endl;
+    cout << dll[1].vertex << endl;
+
+    cout <<"\n Programa Terminado con Exito"<<endl;
+    return 0;
+}
