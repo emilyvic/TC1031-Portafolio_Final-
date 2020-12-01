@@ -1,0 +1,62 @@
+#include <iostream>
+#include <sstream> 
+#include<fstream>
+#include<string>
+using namespace std;
+#include<stack>
+#include<vector>
+#include "Dato.h"
+#include "Hash.h"
+#include "Graph.h"
+
+void leerArchivo(Graph<Dato> &graph_IPS){
+    int n,m;// cantidad de vertices, cantidad de relaciones
+    string IP, mes, dia, hora, IP_source, IP_target, falla;
+    stack<Dato> stk_vertex;
+    ifstream archEnt; //declarar archivo de entrada
+    archEnt.open("bitacoraACT4_3.txt");//abrir archivo de entrada
+    archEnt >> n >> m; //leer la cantidad de vertices y cantidad de incidencias.
+
+    //Leer las IP's
+    for(int i=0; i<n; i++){//leer la cantidad de vertices distintos
+        archEnt >> IP; //leer cada IP
+        Dato ips(IP);//crear una instancia de la clase Dato
+        stk_vertex.push(ips);//agregar el dato a la stack de IP's vertices
+    }
+    cout <<endl;
+    
+    Graph<Dato> g_aux(stk_vertex);//crear grafo auxiliar
+    //Leer las incidencias
+    for(int j=0; j<m; j++){
+        archEnt >> mes >> dia >> hora>> IP_source >> IP_target; 
+        getline(archEnt, falla);//leer la falla con espacios
+
+        Dato origen(IP_source);//inicializar dato de origen
+        Dato objetivo(IP_target);//inicializar dato de destino
+
+        g_aux.addAdj(origen, objetivo);//agregar adyacencia con origen y destino
+    }
+    cout <<endl;
+    graph_IPS = g_aux;
+    //graph_IPS.print();//desplegar lista de adyacencia de grafo
+}//Complejidad O(n)
+
+
+int main(){
+    Graph<Dato> graph_IP;//grafo de tipo Dato inicializado por default
+    string strIP;
+    leerArchivo(graph_IP);//leer los datos del archivo
+    cout <<"Digite el IP que desea buscar: " <<endl;
+    cin >> strIP;//el usuario digita la IP que desea que se desplieguen sus adyacencias
+    Dato dIP(strIP);//crear una nueva instancia del dato con dicha IP
+    try{
+        //cout << "El elemento: "  << strIP << " se encuentra en la posicion: " << graph_IP.findVertex(dIP) <<endl; //checar que la posicion este correcta
+        graph_IP.printPersonalAdjList(dIP); //imprimir la lista de incidencias de un solo vertice en determinado
+    }
+    catch(runtime_error& e){//identificar excepción
+        cout << e.what() << endl; 
+    }
+    
+    cout <<"\n Programa Terminado con Exito"<<endl;
+    return 0;
+}
